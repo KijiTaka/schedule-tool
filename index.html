@@ -30,7 +30,6 @@
 
     body.is-dragging, body.is-dragging * { cursor: ew-resize !important; touch-action: none; }
 
-    /* トップヘッダー */
     .top-bar {
       display: flex;
       flex-wrap: wrap;
@@ -81,7 +80,6 @@
     }
     @keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.3; transform: scale(0.8); } }
 
-    /* タイムラインエリア */
     .timelines-container {
       display: flex;
       flex-direction: column;
@@ -129,7 +127,6 @@
       color: var(--primary);
     }
 
-    /* SVG タイムライン */
     .timeline-svg-wrapper {
       position: relative;
       width: 100%;
@@ -150,7 +147,6 @@
     .tick-line-bold { stroke: rgba(255, 255, 255, 0.3); stroke-width: 1.5; }
     .tick-text { font-size: 9px; fill: var(--text-sub); text-anchor: middle; font-weight: 600; }
 
-    /* バーのクリック・移動用 */
     .schedule-bar-hitbox {
       stroke: transparent;
       stroke-width: 20px;
@@ -161,7 +157,6 @@
       cursor: grabbing;
     }
 
-    /* バーの見た目 */
     .schedule-bar-main {
       stroke-width: 12px !important;
       stroke-linecap: round;
@@ -170,7 +165,6 @@
     }
     .schedule-bar-hitbox:hover + .schedule-bar-main { opacity: 0.85; }
 
-    /* ドラッグ（伸縮・移動）中のガイド表示 */
     .schedule-bar-ghost {
       stroke-width: 14px;
       stroke-linecap: round;
@@ -187,7 +181,6 @@
       100% { filter: drop-shadow(0 0 10px rgba(56, 189, 248, 1)) drop-shadow(0 0 15px #38bdf8); stroke-width: 14px; }
     }
 
-    /* 左右の伸縮ハンドル */
     .edge-handle { 
       fill: transparent; 
       cursor: ew-resize; 
@@ -207,7 +200,6 @@
       pointer-events: none;
     }
 
-    /* ツールチップ */
     .popup-tooltip {
       position: fixed;
       display: none;
@@ -226,7 +218,6 @@
       backdrop-filter: blur(6px);
     }
 
-    /* コンテキストメニュー */
     .context-menu {
       position: fixed;
       display: none;
@@ -253,7 +244,6 @@
       background: rgba(244, 63, 94, 0.15);
     }
 
-    /* モーダルダイアログ */
     .modal-overlay {
       position: fixed;
       top: 0; left: 0; width: 100%; height: 100%;
@@ -288,7 +278,6 @@
       cursor: pointer;
     }
 
-    /* トースト通知 */
     .toast-msg {
       position: fixed;
       bottom: 12px;
@@ -304,7 +293,6 @@
       box-shadow: 0 4px 12px rgba(0,0,0,0.4);
     }
 
-    /* 下部エリア */
     .bottom-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -392,7 +380,6 @@
     .task-checkbox { width: 16px; height: 16px; cursor: pointer; accent-color: var(--success); }
     .task-title.done { text-decoration: line-through; color: var(--text-sub); }
 
-    /* モバイルレスポンシブ */
     @media (max-width: 768px) {
       body { padding: 8px; }
       .top-bar { flex-direction: column; align-items: stretch; }
@@ -407,18 +394,14 @@
 </head>
 <body onclick="hideContextMenu()">
 
-  <!-- ツールチップ -->
   <div id="tooltip" class="popup-tooltip"></div>
 
-  <!-- コンテキストメニュー -->
   <div id="context-menu" class="context-menu">
     <div class="context-menu-item" onclick="onContextDelete()">🗑️ 予定を削除</div>
   </div>
 
-  <!-- トースト通知 -->
   <div id="toast" class="toast-msg"></div>
 
-  <!-- 起動時ポップアップ -->
   <div id="startup-modal" class="modal-overlay">
     <div class="modal-card" style="text-align: center;">
       <button class="modal-close-btn" onclick="closeStartupModal()">✕</button>
@@ -431,7 +414,6 @@
     </div>
   </div>
 
-  <!-- CSV出力用モーダル -->
   <div id="csv-modal" class="modal-overlay">
     <div class="modal-card">
       <button class="modal-close-btn" onclick="closeCSVModal()">✕</button>
@@ -446,7 +428,6 @@
     </div>
   </div>
 
-  <!-- CSV復元用モーダル -->
   <div id="import-modal" class="modal-overlay">
     <div class="modal-card">
       <button class="modal-close-btn" onclick="closeImportModal()">✕</button>
@@ -461,7 +442,6 @@
     </div>
   </div>
 
-  <!-- トップバー -->
   <div class="top-bar">
     <div style="display: flex; align-items: center; gap: 12px;">
       <div>
@@ -481,9 +461,7 @@
     </div>
   </div>
 
-  <!-- 3日縦並び タイムライン (8時〜20時) -->
   <div class="timelines-container">
-    <!-- 前日 -->
     <div class="timeline-card">
       <div class="day-header">
         <div class="day-title">
@@ -499,7 +477,6 @@
       </div>
     </div>
 
-    <!-- 今日 -->
     <div class="timeline-card today">
       <div class="day-header">
         <div class="day-title" style="color: var(--primary);">
@@ -516,7 +493,6 @@
       </div>
     </div>
 
-    <!-- 翌日 -->
     <div class="timeline-card">
       <div class="day-header">
         <div class="day-title">
@@ -533,9 +509,7 @@
     </div>
   </div>
 
-  <!-- 下部操作エリア -->
   <div class="bottom-grid">
-    <!-- フォーム -->
     <div class="card">
       <h3 style="font-size: 13px;" id="form-title">予定の追加</h3>
       <form id="add-form" onsubmit="saveSchedule(event)">
@@ -571,7 +545,6 @@
       </form>
     </div>
 
-    <!-- 予定一覧 -->
     <div class="card">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
         <h3 style="font-size: 13px;">予定一覧 (8時-20時)</h3>
@@ -584,18 +557,14 @@
       <div id="schedule-list"></div>
     </div>
 
-    <!-- タスク (ToDo) -->
     <div class="card">
       <h3 style="font-size: 13px; margin-bottom: 6px;">タスク (ToDo)</h3>
       <form onsubmit="addTask(event)" style="display: flex; flex-direction: column; gap: 4px; margin-bottom: 6px;">
         <input type="text" id="task-input" placeholder="タスクタイトル..." required style="width: 100%;">
         <div style="display: flex; gap: 4px; align-items: center;">
           <span style="font-size: 10px; color: var(--text-sub);">期限:</span>
-          <select id="task-month" style="flex: 1; font-size: 11px; padding: 4px;">
-            <option value="">月なし</option>
-          </select>
-          <select id="task-day" style="flex: 1; font-size: 11px; padding: 4px;">
-            <option value="">日なし</option>
+          <select id="task-duedate" style="flex: 1; font-size: 11px; padding: 4px;">
+            <option value="">期限なし</option>
           </select>
           <button type="submit" class="btn-primary" id="task-btn-submit" style="padding: 6px 12px;">追加</button>
           <button type="button" class="btn-secondary" id="task-btn-cancel" onclick="resetTaskForm()" style="display:none; padding: 6px 8px;">中止</button>
@@ -630,7 +599,10 @@
     function getDateKey(offset) {
       const d = new Date();
       d.setDate(d.getDate() + offset);
-      return d.toISOString().split('T')[0];
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return `${y}-${m}-${day}`;
     }
 
     function getFormattedDate(offset) {
@@ -654,8 +626,10 @@
 
     let db = JSON.parse(localStorage.getItem('chrono_line_24h_db')) || {
       schedules: [],
-      tasks: []
+      tasks: [],
+      colorCounter: 0
     };
+    if (typeof db.colorCounter !== 'number') db.colorCounter = db.schedules.length;
 
     let dragState = null;
     let animFrameId = null;
@@ -702,7 +676,7 @@
     }
 
     function handleRestart() {
-      db = { schedules: [], tasks: [] };
+      db = { schedules: [], tasks: [], colorCounter: 0 };
       saveDB();
       showToast("新規データでスタートしました");
       closeStartupModal();
@@ -830,16 +804,25 @@
       startSel.value = 9.5;
       endSel.value = 10.5;
 
-      const monthSel = document.getElementById('task-month');
-      const daySel = document.getElementById('task-day');
-      monthSel.innerHTML = '<option value="">月なし</option>';
-      daySel.innerHTML = '<option value="">日なし</option>';
+      const dueSel = document.getElementById('task-duedate');
+      dueSel.innerHTML = '<option value="">期限なし</option>';
+      const daysInMonth = [31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
 
-      for (let m = 1; m <= 12; m++) {
-        monthSel.add(new Option(`${m}月`, m));
-      }
-      for (let d = 1; d <= 31; d++) {
-        daySel.add(new Option(`${d}日`, d));
+      const now = new Date();
+      const baseMonth = now.getMonth();
+
+      for (let offset = -1; offset <= 1; offset++) {
+        const m = ((baseMonth + offset) % 12 + 12) % 12;
+        const monthNum = m + 1;
+        const group = document.createElement('optgroup');
+        group.label = `${monthNum}月`;
+        for (let d = 1; d <= daysInMonth[m]; d++) {
+          const mm = String(monthNum).padStart(2, '0');
+          const dd = String(d).padStart(2, '0');
+          const opt = new Option(`${monthNum}月${d}日`, `${mm}-${dd}`);
+          group.appendChild(opt);
+        }
+        dueSel.appendChild(group);
       }
     }
 
@@ -966,7 +949,6 @@
 
         const isActiveNow = isToday && !item.manualOff && (currentHour >= item.start && currentHour <= item.end);
 
-        // 1. バー全体の移動・クリック領域
         const hitBox = document.createElementNS('http://www.w3.org/2000/svg', 'line');
         hitBox.setAttribute('x1', x1); hitBox.setAttribute('y1', y);
         hitBox.setAttribute('x2', x2); hitBox.setAttribute('y2', y);
@@ -985,7 +967,6 @@
 
         group.appendChild(hitBox);
 
-        // 2. 実際の描画バー
         const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
         line.setAttribute('x1', x1); line.setAttribute('y1', y);
         line.setAttribute('x2', x2); line.setAttribute('y2', y);
@@ -994,7 +975,6 @@
 
         group.appendChild(line);
 
-        // 3. 左右の伸縮ハンドル
         const handleRadius = Math.min(8, barWidth / 3);
         if (handleRadius > 1) {
           const hLeft = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
@@ -1013,7 +993,6 @@
         }
       });
 
-      // 4. ドラッグ中のプレビュー描画（ゴーストバー）
       if (dragState && dragState.offset === offset && dragState.hasMoved) {
         const item = db.schedules.find(s => s.id === dragState.id);
         if (item) {
@@ -1132,7 +1111,6 @@
               dragState.tempEnd = Math.round(newEnd * 4) / 4;
             }
 
-            // ドラッグ中の仮の範囲とツールチップを表示
             showTooltip(evt, `変更後: ${formatTime(dragState.tempStart)} - ${formatTime(dragState.tempEnd)}`);
             renderBars(dragState.offset);
           }
@@ -1203,7 +1181,6 @@
     }
 
     function onSvgDblClick(e, offset) {
-      // 編集状態を解除して新規追加モードにする
       resetForm();
 
       const hour = getHourFromEvent(e, offset);
@@ -1230,7 +1207,13 @@
       }
 
       const dateKey = getDateKey(offset);
-      const color = colorVal === 'auto' ? palette[db.schedules.length % palette.length] : colorVal;
+      let color;
+      if (colorVal === 'auto') {
+        color = palette[db.colorCounter % palette.length];
+        db.colorCounter++;
+      } else {
+        color = colorVal;
+      }
 
       if (editingId) {
         const item = db.schedules.find(s => s.id === editingId);
@@ -1308,13 +1291,20 @@
     function addTask(e) {
       e.preventDefault();
       const title = document.getElementById('task-input').value.trim();
-      const month = document.getElementById('task-month').value;
-      const day = document.getElementById('task-day').value;
+      const mmdd = document.getElementById('task-duedate').value;
 
       let dueDate = '';
-      if (month && day) {
-        const year = new Date().getFullYear();
-        dueDate = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+      if (mmdd) {
+        const now = new Date();
+        const selectedMonth = parseInt(mmdd.split('-')[0], 10);
+        let year = now.getFullYear();
+        const currentMonth = now.getMonth() + 1;
+        if (currentMonth === 12 && selectedMonth === 1) {
+          year += 1;
+        } else if (currentMonth === 1 && selectedMonth === 12) {
+          year -= 1;
+        }
+        dueDate = `${year}-${mmdd}`;
       }
 
       if (editingTaskId) {
@@ -1350,12 +1340,10 @@
       if (t.dueDate) {
         const parts = t.dueDate.split('-');
         if (parts.length === 3) {
-          document.getElementById('task-month').value = parseInt(parts[1], 10);
-          document.getElementById('task-day').value = parseInt(parts[2], 10);
+          document.getElementById('task-duedate').value = `${parts[1]}-${parts[2]}`;
         }
       } else {
-        document.getElementById('task-month').value = '';
-        document.getElementById('task-day').value = '';
+        document.getElementById('task-duedate').value = '';
       }
 
       document.getElementById('task-btn-submit').textContent = '更新';
@@ -1379,8 +1367,7 @@
     function resetTaskForm() {
       editingTaskId = null;
       document.getElementById('task-input').value = '';
-      document.getElementById('task-month').value = '';
-      document.getElementById('task-day').value = '';
+      document.getElementById('task-duedate').value = '';
       document.getElementById('task-btn-submit').textContent = '追加';
       document.getElementById('task-btn-cancel').style.display = 'none';
     }
@@ -1431,7 +1418,7 @@
       const listEl = document.getElementById('task-list');
       if (!listEl) return;
 
-      const todayStr = new Date().toISOString().split('T')[0];
+      const todayStr = getDateKey(0);
 
       if (db.tasks.length === 0) {
         listEl.innerHTML = '<div style="font-size:11px; color:var(--text-sub); text-align:center; padding:12px;">タスクはありません</div>';
@@ -1481,7 +1468,6 @@
       renderTaskList();
     }
 
-    // 初期化処理
     window.addEventListener('DOMContentLoaded', () => {
       initTimeSelects();
       render();
