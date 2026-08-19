@@ -127,6 +127,25 @@
       color: var(--primary);
     }
 
+    /* 3時間切り替えナビゲーション（デフォルト非表示：スマホ時のみCSSで表示） */
+    .timeline-nav-controls {
+      display: none;
+      align-items: center;
+      gap: 6px;
+    }
+    .nav-btn {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid var(--card-border);
+      color: var(--text);
+      border-radius: 4px;
+      padding: 2px 8px;
+      font-size: 10px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    .nav-btn:hover { background: rgba(56, 189, 248, 0.2); border-color: var(--primary); }
+    .nav-range-label { font-size: 10px; font-weight: bold; color: var(--primary); min-width: 65px; text-align: center; }
+
     .timeline-svg-wrapper {
       position: relative;
       width: 100%;
@@ -153,9 +172,6 @@
       stroke-linecap: round;
       cursor: pointer;
     }
-    .schedule-bar-hitbox:active {
-      cursor: grabbing;
-    }
 
     .schedule-bar-main {
       stroke-width: 12px !important;
@@ -163,7 +179,6 @@
       pointer-events: none;
       transition: opacity 0.1s, filter 0.3s;
     }
-    .schedule-bar-hitbox:hover + .schedule-bar-main { opacity: 0.85; }
 
     .schedule-bar-ghost {
       stroke-width: 14px;
@@ -181,10 +196,7 @@
       100% { filter: drop-shadow(0 0 10px rgba(56, 189, 248, 1)) drop-shadow(0 0 15px #38bdf8); stroke-width: 14px; }
     }
 
-    .edge-handle { 
-      fill: transparent; 
-      cursor: ew-resize; 
-    }
+    .edge-handle { fill: transparent; cursor: ew-resize; }
 
     .now-line {
       stroke: #f43f5e;
@@ -240,9 +252,7 @@
       align-items: center;
       gap: 6px;
     }
-    .context-menu-item:hover {
-      background: rgba(244, 63, 94, 0.15);
-    }
+    .context-menu-item:hover { background: rgba(244, 63, 94, 0.15); }
 
     .modal-overlay {
       position: fixed;
@@ -269,27 +279,19 @@
 
     .modal-close-btn {
       position: absolute;
-      top: 10px;
-      right: 12px;
-      background: transparent;
-      border: none;
-      color: var(--text-sub);
-      font-size: 16px;
-      cursor: pointer;
+      top: 10px; right: 12px;
+      background: transparent; border: none; color: var(--text-sub);
+      font-size: 16px; cursor: pointer;
     }
 
     .toast-msg {
       position: fixed;
-      bottom: 12px;
-      right: 12px;
+      bottom: 12px; right: 12px;
       background: rgba(52, 211, 153, 0.95);
       color: #0b0f19;
-      font-size: 11px;
-      font-weight: 700;
-      padding: 8px 14px;
-      border-radius: 6px;
-      display: none;
-      z-index: 300;
+      font-size: 11px; font-weight: 700;
+      padding: 8px 14px; border-radius: 6px;
+      display: none; z-index: 300;
       box-shadow: 0 4px 12px rgba(0,0,0,0.4);
     }
 
@@ -380,6 +382,7 @@
     .task-checkbox { width: 16px; height: 16px; cursor: pointer; accent-color: var(--success); }
     .task-title.done { text-decoration: line-through; color: var(--text-sub); }
 
+    /* スマホ表示時の制御 */
     @media (max-width: 768px) {
       body { padding: 8px; }
       .top-bar { flex-direction: column; align-items: stretch; }
@@ -389,6 +392,11 @@
       .bottom-grid { grid-template-columns: 1fr; }
       .timeline-card { padding: 8px 10px; }
       input, select, button { font-size: 14px; }
+      
+      /* スマホ表示時のみ ◀ ▶ ナビゲーションを表示 */
+      .timeline-nav-controls {
+        display: flex;
+      }
     }
   </style>
 </head>
@@ -434,7 +442,7 @@
       <button class="modal-close-btn" onclick="closeImportModal()">✕</button>
       <div style="font-size:14px; font-weight:bold; margin-bottom:12px;">📥 CSVからデータを復元</div>
       <div style="margin-bottom:16px;">
-        <input type="file" id="csv-file-input" accept=".csv,text/csv,application/vnd.ms-excel,application/csv,text/plain" style="width:100%; font-size:11px;">
+        <input type="file" id="csv-file-input" accept="*/*" style="width:100%; font-size:11px;">
       </div>
       <div style="display:flex; gap:8px;">
         <button class="btn-success" onclick="processImportCSV()" style="flex:1;">復元実行</button>
@@ -458,17 +466,23 @@
     <div class="header-actions" style="display: flex; gap: 6px; align-items: center;">
       <button class="btn-secondary" onclick="openImportModal()">📥 CSV読み込み</button>
       <button class="btn-secondary" onclick="openCSVModal()">📊 CSV書き出し</button>
-      <button class="btn-secondary" onclick="chooseBackupFile()" title="Googleドライブ同期フォルダ内のファイルなどを指定すると、以後は自動で上書き保存されます">📁 保存先指定</button>
+      <button class="btn-secondary" onclick="chooseBackupFile()" title="PC等で同期フォルダ内のファイルを指定すると自動上書きが有効になります">📁 保存先指定</button>
       <button class="btn-danger" id="bk-close-btn" onclick="backupAndExit()">💾 BK・Close</button>
     </div>
   </div>
 
   <div class="timelines-container">
+    <!-- YESTERDAY -->
     <div class="timeline-card">
       <div class="day-header">
         <div class="day-title">
           <span>YESTERDAY</span>
           <span class="day-badge" id="date-label--1">--</span>
+        </div>
+        <div class="timeline-nav-controls">
+          <button class="nav-btn" onclick="shiftWindow(-1, -1)">◀</button>
+          <span class="nav-range-label" id="range-label--1">8時-20時</span>
+          <button class="nav-btn" onclick="shiftWindow(-1, 1)">▶</button>
         </div>
       </div>
       <div class="timeline-svg-wrapper" id="svg-wrapper--1">
@@ -479,11 +493,17 @@
       </div>
     </div>
 
+    <!-- TODAY -->
     <div class="timeline-card today">
       <div class="day-header">
         <div class="day-title" style="color: var(--primary);">
           <span>TODAY</span>
           <span class="day-badge" id="date-label-0">--</span>
+        </div>
+        <div class="timeline-nav-controls">
+          <button class="nav-btn" onclick="shiftWindow(0, -1)">◀</button>
+          <span class="nav-range-label" id="range-label-0">8時-20時</span>
+          <button class="nav-btn" onclick="shiftWindow(0, 1)">▶</button>
         </div>
       </div>
       <div class="timeline-svg-wrapper" id="svg-wrapper-0">
@@ -495,11 +515,17 @@
       </div>
     </div>
 
+    <!-- TOMORROW -->
     <div class="timeline-card">
       <div class="day-header">
         <div class="day-title">
           <span>TOMORROW</span>
           <span class="day-badge" id="date-label-1">--</span>
+        </div>
+        <div class="timeline-nav-controls">
+          <button class="nav-btn" onclick="shiftWindow(1, -1)">◀</button>
+          <span class="nav-range-label" id="range-label-1">8時-20時</span>
+          <button class="nav-btn" onclick="shiftWindow(1, 1)">▶</button>
         </div>
       </div>
       <div class="timeline-svg-wrapper" id="svg-wrapper-1">
@@ -579,6 +605,17 @@
   <script>
     const START_HOUR = 8;
     const END_HOUR = 20;
+
+    // 各タイムラインの表示状態設定
+    let viewState = {
+      '-1': { startHour: 8, span: 12 },
+      '0': { startHour: 8, span: 12 },
+      '1': { startHour: 8, span: 12 }
+    };
+
+    function isMobileDevice() {
+      return window.innerWidth <= 768;
+    }
 
     let editingId = null;
     let editingTaskId = null;
@@ -776,7 +813,6 @@
       db.tasks = newTasks;
     }
 
-    // --- File System Access API 対応（Chrome/Edge限定） ---
     let fsFileHandle = null;
     const FS_SUPPORTED = 'showSaveFilePicker' in window;
 
@@ -807,9 +843,6 @@
       });
     }
 
-    // 起動時に前回選択したファイルハンドルを復元
-    // 権限は保留状態でもハンドル自体は保持しておき、実際の権限確認・再許可は
-    // ユーザー操作（BK・Closeやrestoreのクリック）のタイミングで行う
     async function restoreFsHandle() {
       if (!FS_SUPPORTED) return;
       try {
@@ -830,7 +863,7 @@
 
     async function chooseBackupFile() {
       if (!FS_SUPPORTED) {
-        alert("お使いのブラウザはこの機能に対応していません（Chrome/Edge推奨）。従来のダウンロード方式を使用します。");
+        alert("お使いのブラウザはこの機能に対応していません（PCのChrome/Edge推奨）。");
         return;
       }
       try {
@@ -967,11 +1000,44 @@
       }
     }
 
-    function hourToX(hour) {
+    // スマホでの 3時間スクロール切替処理
+    function shiftWindow(offset, dir) {
+      if (!isMobileDevice()) return;
+
+      const st = viewState[offset];
+      if (st.span === 12) {
+        st.span = 3;
+        st.startHour = (dir > 0) ? 11 : 8;
+      } else {
+        st.startHour += dir * 3;
+        if (st.startHour < 8 || st.startHour > 17) {
+          st.startHour = 8;
+        }
+      }
+      renderBars(offset);
+      if (offset === 0) renderNowMarker();
+    }
+
+    function getEffectiveViewState(offset) {
+      // PC画面（>768px）では常に全タイムライン（8時〜20時、幅12h）
+      if (!isMobileDevice()) {
+        return { startHour: 8, span: 12 };
+      }
+      // スマホ画面では current viewState（デフォルト3h表示）
+      const st = viewState[offset] || { startHour: 8, span: 3 };
+      if (st.span === 12) st.span = 3; // スマホ初期値のフォールバック
+      return st;
+    }
+
+    function hourToX(hour, offset) {
       const paddingLeft = 30;
       const width = 940;
-      const clamped = Math.max(START_HOUR, Math.min(END_HOUR, hour));
-      return paddingLeft + ((clamped - START_HOUR) / (END_HOUR - START_HOUR)) * width;
+      const st = getEffectiveViewState(offset);
+      const minH = st.startHour;
+      const maxH = st.startHour + st.span;
+
+      const clamped = Math.max(minH, Math.min(maxH, hour));
+      return paddingLeft + ((clamped - minH) / (maxH - minH)) * width;
     }
 
     function getHourFromEvent(e, offset) {
@@ -983,8 +1049,13 @@
       const svgX = (clientX - rect.left) * (viewBox.width / rect.width);
       const paddingLeft = 30;
       const width = 940;
-      let hour = START_HOUR + ((svgX - paddingLeft) / width) * (END_HOUR - START_HOUR);
-      return Math.max(START_HOUR, Math.min(END_HOUR, hour));
+
+      const st = getEffectiveViewState(offset);
+      const minH = st.startHour;
+      const maxH = st.startHour + st.span;
+
+      let hour = minH + ((svgX - paddingLeft) / width) * (maxH - minH);
+      return Math.max(minH, Math.min(maxH, hour));
     }
 
     function assignLanes(items) {
@@ -1014,8 +1085,17 @@
       const group = document.getElementById(`grid-${offset}`);
       const svg = document.getElementById(`svg-${offset}`);
       const wrapper = document.getElementById(`svg-wrapper-${offset}`);
+      const label = document.getElementById(`range-label-${offset}`);
       if (!group || !svg) return;
       group.innerHTML = '';
+
+      const st = getEffectiveViewState(offset);
+      const minH = st.startHour;
+      const maxH = st.startHour + st.span;
+
+      if (label) {
+        label.textContent = (st.span === 12) ? "8時-20時" : `${minH}時-${maxH}時`;
+      }
 
       const baseY = 30;
       const laneGap = 22;
@@ -1027,15 +1107,18 @@
       const paddingLeft = 30;
       const width = 940;
 
-      const x930 = hourToX(9.5);
-      const x1830 = hourToX(18.5);
-      const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-      rect.setAttribute('x', x930);
-      rect.setAttribute('y', 4);
-      rect.setAttribute('width', x1830 - x930);
-      rect.setAttribute('height', totalHeight - 10);
-      rect.setAttribute('class', 'core-zone-rect');
-      group.appendChild(rect);
+      // コアゾーン（9:30-18:30）の描画
+      if (maxH > 9.5 && minH < 18.5) {
+        const xStart = hourToX(Math.max(minH, 9.5), offset);
+        const xEnd = hourToX(Math.min(maxH, 18.5), offset);
+        const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+        rect.setAttribute('x', xStart);
+        rect.setAttribute('y', 4);
+        rect.setAttribute('width', xEnd - xStart);
+        rect.setAttribute('height', totalHeight - 10);
+        rect.setAttribute('class', 'core-zone-rect');
+        group.appendChild(rect);
+      }
 
       for (let l = 0; l < laneCount; l++) {
         const bg = document.createElementNS('http://www.w3.org/2000/svg', 'line');
@@ -1045,8 +1128,10 @@
         group.appendChild(bg);
       }
 
-      for (let i = START_HOUR; i <= END_HOUR; i++) {
-        const x = hourToX(i);
+      // 目盛り描画
+      const step = 1;
+      for (let i = minH; i <= maxH; i += step) {
+        const x = hourToX(i, offset);
         const isWorkBoundary = (i === 9 || i === 18);
 
         const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
@@ -1082,9 +1167,18 @@
       const baseY = 30;
       const laneGap = 22;
 
+      const st = getEffectiveViewState(offset);
+      const minH = st.startHour;
+      const maxH = st.startHour + st.span;
+
       items.forEach(item => {
-        const x1 = hourToX(item.start);
-        const x2 = hourToX(item.end);
+        if (item.end <= minH || item.start >= maxH) return;
+
+        const clampedStart = Math.max(minH, item.start);
+        const clampedEnd = Math.min(maxH, item.end);
+
+        const x1 = hourToX(clampedStart, offset);
+        const x2 = hourToX(clampedEnd, offset);
         const barWidth = x2 - x1;
         const y = baseY + (item.lane || 0) * laneGap;
 
@@ -1118,27 +1212,31 @@
 
         const handleRadius = Math.min(8, barWidth / 3);
         if (handleRadius > 1) {
-          const hLeft = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-          hLeft.setAttribute('cx', x1); hLeft.setAttribute('cy', y); hLeft.setAttribute('r', handleRadius);
-          hLeft.setAttribute('class', 'edge-handle');
-          hLeft.addEventListener('mousedown', (e) => startDrag(e, item.id, 'start', offset));
-          hLeft.addEventListener('touchstart', (e) => startDrag(e, item.id, 'start', offset), { passive: false });
-          group.appendChild(hLeft);
+          if (item.start >= minH) {
+            const hLeft = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+            hLeft.setAttribute('cx', x1); hLeft.setAttribute('cy', y); hLeft.setAttribute('r', handleRadius);
+            hLeft.setAttribute('class', 'edge-handle');
+            hLeft.addEventListener('mousedown', (e) => startDrag(e, item.id, 'start', offset));
+            hLeft.addEventListener('touchstart', (e) => startDrag(e, item.id, 'start', offset), { passive: false });
+            group.appendChild(hLeft);
+          }
 
-          const hRight = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-          hRight.setAttribute('cx', x2); hRight.setAttribute('cy', y); hRight.setAttribute('r', handleRadius);
-          hRight.setAttribute('class', 'edge-handle');
-          hRight.addEventListener('mousedown', (e) => startDrag(e, item.id, 'end', offset));
-          hRight.addEventListener('touchstart', (e) => startDrag(e, item.id, 'end', offset), { passive: false });
-          group.appendChild(hRight);
+          if (item.end <= maxH) {
+            const hRight = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+            hRight.setAttribute('cx', x2); hRight.setAttribute('cy', y); hRight.setAttribute('r', handleRadius);
+            hRight.setAttribute('class', 'edge-handle');
+            hRight.addEventListener('mousedown', (e) => startDrag(e, item.id, 'end', offset));
+            hRight.addEventListener('touchstart', (e) => startDrag(e, item.id, 'end', offset), { passive: false });
+            group.appendChild(hRight);
+          }
         }
       });
 
       if (dragState && dragState.offset === offset && dragState.hasMoved) {
         const item = db.schedules.find(s => s.id === dragState.id);
         if (item) {
-          const gx1 = hourToX(dragState.tempStart);
-          const gx2 = hourToX(dragState.tempEnd);
+          const gx1 = hourToX(Math.max(minH, dragState.tempStart), offset);
+          const gx2 = hourToX(Math.min(maxH, dragState.tempEnd), offset);
           const gy = baseY + (item.lane || 0) * laneGap;
 
           const ghost = document.createElementNS('http://www.w3.org/2000/svg', 'line');
@@ -1160,9 +1258,13 @@
       const now = new Date();
       const currentHour = now.getHours() + now.getMinutes() / 60 + now.getSeconds() / 3600;
 
-      if (currentHour < START_HOUR || currentHour > END_HOUR) return;
+      const st = getEffectiveViewState(0);
+      const minH = st.startHour;
+      const maxH = st.startHour + st.span;
 
-      const x = hourToX(currentHour);
+      if (currentHour < minH || currentHour > maxH) return;
+
+      const x = hourToX(currentHour, 0);
       const totalHeight = svg.viewBox.baseVal.height || 80;
 
       const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
@@ -1600,6 +1702,16 @@
     }
 
     function render() {
+      // スマホ起動時のデフォルト表示幅を3時間に設定
+      if (isMobileDevice()) {
+        [-1, 0, 1].forEach(offset => {
+          if (viewState[offset].span === 12) {
+            viewState[offset].span = 3;
+            viewState[offset].startHour = 8;
+          }
+        });
+      }
+
       [-1, 0, 1].forEach(offset => {
         document.getElementById(`date-label-${offset}`).textContent = getFormattedDate(offset);
         renderBars(offset);
@@ -1608,6 +1720,11 @@
       renderScheduleList();
       renderTaskList();
     }
+
+    // 画面リサイズ時にPC/スマホ表示を自動切替
+    window.addEventListener('resize', () => {
+      render();
+    });
 
     window.addEventListener('DOMContentLoaded', async () => {
       initTimeSelects();
