@@ -74,8 +74,7 @@
       font-family: monospace;
     }
     .now-dot {
-      width: 6px;
-      height: 6px; border-radius: 50%; background: var(--danger);
+      width: 6px; height: 6px; border-radius: 50%; background: var(--danger);
       box-shadow: 0 0 6px var(--danger);
       animation: pulse 1.2s infinite;
     }
@@ -128,11 +127,6 @@
       color: var(--primary);
     }
 
-    /* スマホ用3h切替コントローラー（PCでは非表示） */
-    .time-page-ctrl {
-      display: none;
-    }
-
     .timeline-svg-wrapper {
       position: relative;
       width: 100%;
@@ -159,7 +153,9 @@
       stroke-linecap: round;
       cursor: pointer;
     }
-    .schedule-bar-hitbox:active { cursor: grabbing; }
+    .schedule-bar-hitbox:active {
+      cursor: grabbing;
+    }
 
     .schedule-bar-main {
       stroke-width: 12px !important;
@@ -185,7 +181,10 @@
       100% { filter: drop-shadow(0 0 10px rgba(56, 189, 248, 1)) drop-shadow(0 0 15px #38bdf8); stroke-width: 14px; }
     }
 
-    .edge-handle { fill: transparent; cursor: ew-resize; }
+    .edge-handle { 
+      fill: transparent; 
+      cursor: ew-resize; 
+    }
 
     .now-line {
       stroke: #f43f5e;
@@ -241,7 +240,9 @@
       align-items: center;
       gap: 6px;
     }
-    .context-menu-item:hover { background: rgba(244, 63, 94, 0.15); }
+    .context-menu-item:hover {
+      background: rgba(244, 63, 94, 0.15);
+    }
 
     .modal-overlay {
       position: fixed;
@@ -388,31 +389,6 @@
       .bottom-grid { grid-template-columns: 1fr; }
       .timeline-card { padding: 8px 10px; }
       input, select, button { font-size: 14px; }
-
-      /* スマホ表示時の3時間切替コントローラー */
-      .time-page-ctrl {
-        display: flex;
-        align-items: center;
-        gap: 6px;
-      }
-      .time-page-btn {
-        background: rgba(255, 255, 255, 0.1);
-        color: var(--text);
-        border: 1px solid var(--card-border);
-        border-radius: 4px;
-        padding: 2px 8px;
-        font-size: 11px;
-        cursor: pointer;
-      }
-      .time-page-label {
-        font-size: 11px;
-        color: var(--primary);
-        font-family: monospace;
-        font-weight: bold;
-      }
-      .timeline-svg-wrapper {
-        overflow: hidden;
-      }
     }
   </style>
 </head>
@@ -443,7 +419,8 @@
       <button class="modal-close-btn" onclick="closeCSVModal()">✕</button>
       <div style="font-size:14px; font-weight:bold; margin-bottom:12px;">📊 CSV出力</div>
       <div style="font-size:11px; color:var(--text-sub); margin-bottom:16px;">
-        登録されている全予定とタスクをCSVフォーマットで書き出します。
+        登録されている全予定とタスクをCSVフォーマットで書き出します。<br>
+        「📁 保存先指定」で保存先ファイルを一度設定しておくと、以後は自動で上書き保存されます。
       </div>
       <div style="display:flex; gap:8px;">
         <button class="btn-primary" onclick="processExportCSV()" style="flex:1;">ダウンロード</button>
@@ -481,7 +458,8 @@
     <div class="header-actions" style="display: flex; gap: 6px; align-items: center;">
       <button class="btn-secondary" onclick="openImportModal()">📥 CSV読み込み</button>
       <button class="btn-secondary" onclick="openCSVModal()">📊 CSV書き出し</button>
-      <button class="btn-danger" onclick="backupAndExit()">💾 BK・Close</button>
+      <button class="btn-secondary" onclick="chooseBackupFile()" title="Googleドライブ同期フォルダ内のファイルなどを指定すると、以後は自動で上書き保存されます">📁 保存先指定</button>
+      <button class="btn-danger" id="bk-close-btn" onclick="backupAndExit()">💾 BK・Close</button>
     </div>
   </div>
 
@@ -491,11 +469,6 @@
         <div class="day-title">
           <span>YESTERDAY</span>
           <span class="day-badge" id="date-label--1">--</span>
-        </div>
-        <div class="time-page-ctrl">
-          <button class="time-page-btn" onclick="changePage(-1, -1)">◀</button>
-          <span class="time-page-label" id="page-label--1">8-11時</span>
-          <button class="time-page-btn" onclick="changePage(-1, 1)">▶</button>
         </div>
       </div>
       <div class="timeline-svg-wrapper" id="svg-wrapper--1">
@@ -512,11 +485,6 @@
           <span>TODAY</span>
           <span class="day-badge" id="date-label-0">--</span>
         </div>
-        <div class="time-page-ctrl">
-          <button class="time-page-btn" onclick="changePage(0, -1)">◀</button>
-          <span class="time-page-label" id="page-label-0">8-11時</span>
-          <button class="time-page-btn" onclick="changePage(0, 1)">▶</button>
-        </div>
       </div>
       <div class="timeline-svg-wrapper" id="svg-wrapper-0">
         <svg class="timeline-svg" viewBox="0 0 1000 80" preserveAspectRatio="none" id="svg-0" ondblclick="onSvgDblClick(event, 0)">
@@ -532,11 +500,6 @@
         <div class="day-title">
           <span>TOMORROW</span>
           <span class="day-badge" id="date-label-1">--</span>
-        </div>
-        <div class="time-page-ctrl">
-          <button class="time-page-btn" onclick="changePage(1, -1)">◀</button>
-          <span class="time-page-label" id="page-label-1">8-11時</span>
-          <button class="time-page-btn" onclick="changePage(1, 1)">▶</button>
         </div>
       </div>
       <div class="timeline-svg-wrapper" id="svg-wrapper-1">
@@ -622,9 +585,6 @@
     let isExitingNormally = false;
     let contextTargetId = null;
 
-    // スマホ用 3時間枠ページ管理 (0:8-11時, 1:11-14時, 2:14-17時, 3:17-20時)
-    const mobilePages = { '-1': 0, '0': 0, '1': 0 };
-
     const palette = [
       '#38bdf8', '#34d399', '#fbbf24', '#a78bfa',
       '#f472b6', '#22d3ee', '#fb923c', '#a3e635'
@@ -637,26 +597,6 @@
         return 'バックアップ（BK）は完了していますか？';
       }
     });
-
-    window.addEventListener('resize', () => {
-      [-1, 0, 1].forEach(offset => renderBars(offset));
-      renderNowMarker();
-    });
-
-    function changePage(offset, dir) {
-      let current = mobilePages[offset] || 0;
-      current += dir;
-      if (current < 0) current = 0;
-      if (current > 3) current = 3;
-      mobilePages[offset] = current;
-
-      const labels = ['8-11時', '11-14時', '14-17時', '17-20時'];
-      const lblEl = document.getElementById(`page-label-${offset}`);
-      if (lblEl) lblEl.textContent = labels[current];
-
-      renderBars(offset);
-      if (offset === 0) renderNowMarker();
-    }
 
     function getDateKey(offset) {
       const d = new Date();
@@ -711,13 +651,12 @@
     function openStartupModal() {
       const bkTime = localStorage.getItem('chrono_line_backup_time');
       const infoText = document.getElementById('bk-info-text');
-      if (bkTime) {
-        infoText.textContent = `前回のBK: ${bkTime}`;
-        infoText.style.color = '#38bdf8';
-      } else {
-        infoText.textContent = '前回のBK: 未保存';
-        infoText.style.color = 'var(--text-sub)';
+      let text = bkTime ? `前回のBK: ${bkTime}` : '前回のBK: 未保存';
+      if (fsFileHandle) {
+        text += `<br><span style="font-size:10px;">📁 保存先ファイル指定済み（そちらを優先して復元します）</span>`;
       }
+      infoText.innerHTML = text;
+      infoText.style.color = bkTime ? '#38bdf8' : 'var(--text-sub)';
       document.getElementById('startup-modal').classList.add('active');
     }
 
@@ -725,15 +664,54 @@
       document.getElementById('startup-modal').classList.remove('active');
     }
 
-    function handleRestore() {
-      const backupCsv = localStorage.getItem('chrono_line_backup_csv');
+    async function readFromFsHandle() {
+      try {
+        const perm = await fsFileHandle.queryPermission({ mode: 'read' });
+        if (perm !== 'granted') {
+          const req = await fsFileHandle.requestPermission({ mode: 'read' });
+          if (req !== 'granted') return null;
+        }
+        const file = await fsFileHandle.getFile();
+        return await file.text();
+      } catch (err) {
+        console.error('ファイルの読み込みに失敗しました', err);
+        return null;
+      }
+    }
+
+    async function handleRestore() {
+      // 優先順位: 1. 指定済みの保存先ファイル（Googleドライブ等） 2. このブラウザのlocalStorage
+      let backupCsv = null;
+      let source = '';
+
+      if (fsFileHandle) {
+        backupCsv = await readFromFsHandle();
+        if (backupCsv) source = '指定ファイル';
+      }
+
+      if (!backupCsv) {
+        backupCsv = localStorage.getItem('chrono_line_backup_csv');
+        if (backupCsv) source = 'このブラウザの保存データ';
+      }
+
       if (backupCsv) {
         parseAndRestoreCSV(backupCsv);
         saveDB();
-        showToast("CSVのBKデータを復元しました");
-      } else {
-        alert("保存済みのバックアップCSVデータが見つかりません。");
+        showToast(`復元しました（${source}）`);
+        closeStartupModal();
+        return;
       }
+
+      // File System Access API非対応（主にスマホ）で保存データも見つからない場合は
+      // CSV読み込み画面を自動で開き、Googleドライブ等からファイルを選んでもらう
+      if (!FS_SUPPORTED) {
+        closeStartupModal();
+        showToast("保存データが見つかりません。CSVファイルを選択してください");
+        openImportModal();
+        return;
+      }
+
+      alert("保存済みのバックアップデータが見つかりません。");
       closeStartupModal();
     }
 
@@ -754,6 +732,7 @@
       db.tasks.forEach(t => {
         csv += `"${t.dateKey}","${t.title.replace(/"/g, '""')}","${t.done ? '1' : '0'}","${t.dueDate || ''}"\n`;
       });
+
       return csv;
     }
 
@@ -767,8 +746,10 @@
       for (let i = 0; i < lines.length; i++) {
         const line = lines[i].trim();
         if (!line) continue;
+
         if (line === '[SCHEDULES]') { mode = 'SCHEDULES'; continue; }
         if (line === '[TASKS]') { mode = 'TASKS'; continue; }
+
         if (line.startsWith('日付,タイトル')) continue;
 
         const cols = line.split(/,(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)/).map(c => c.replace(/^"|"$/g, '').trim());
@@ -798,20 +779,127 @@
       db.tasks = newTasks;
     }
 
+    // --- File System Access API 対応（Chrome/Edge限定） ---
+    let fsFileHandle = null;
+    const FS_SUPPORTED = 'showSaveFilePicker' in window;
+
+    // IndexedDBにファイルハンドルを保存/復元するための簡易ラッパー
+    function idbOpen() {
+      return new Promise((resolve, reject) => {
+        const req = indexedDB.open('chrono_line_fs_db', 1);
+        req.onupgradeneeded = () => req.result.createObjectStore('handles');
+        req.onsuccess = () => resolve(req.result);
+        req.onerror = () => reject(req.error);
+      });
+    }
+    async function idbSetHandle(handle) {
+      const db = await idbOpen();
+      return new Promise((resolve, reject) => {
+        const tx = db.transaction('handles', 'readwrite');
+        tx.objectStore('handles').put(handle, 'backupFile');
+        tx.oncomplete = () => resolve();
+        tx.onerror = () => reject(tx.error);
+      });
+    }
+    async function idbGetHandle() {
+      const db = await idbOpen();
+      return new Promise((resolve, reject) => {
+        const tx = db.transaction('handles', 'readonly');
+        const req = tx.objectStore('handles').get('backupFile');
+        req.onsuccess = () => resolve(req.result || null);
+        req.onerror = () => reject(req.error);
+      });
+    }
+
+    // 起動時に前回選択したファイルハンドルを復元（権限が生きていれば自動で使う）
+    async function restoreFsHandle() {
+      if (!FS_SUPPORTED) return;
+      try {
+        const handle = await idbGetHandle();
+        if (!handle) return;
+        const perm = await handle.queryPermission({ mode: 'readwrite' });
+        if (perm === 'granted') {
+          fsFileHandle = handle;
+          updateBkButtonLabel();
+        }
+      } catch (err) {
+        console.warn('ファイルハンドルの復元に失敗しました', err);
+      }
+    }
+
+    function updateBkButtonLabel() {
+      const btn = document.getElementById('bk-close-btn');
+      if (!btn) return;
+      btn.textContent = fsFileHandle ? '💾 BK上書き・Close' : '💾 BK・Close';
+    }
+
+    // 保存先ファイルを新規に選択（初回のみ、または保存先を変更したい時に使用）
+    async function chooseBackupFile() {
+      if (!FS_SUPPORTED) {
+        alert("お使いのブラウザはこの機能に対応していません（Chrome/Edge推奨）。従来のダウンロード方式を使用します。");
+        return;
+      }
+      try {
+        const handle = await window.showSaveFilePicker({
+          suggestedName: 'chrono_backup.csv',
+          types: [{ description: 'CSVファイル', accept: { 'text/csv': ['.csv'] } }]
+        });
+        fsFileHandle = handle;
+        await idbSetHandle(handle);
+        updateBkButtonLabel();
+        showToast("保存先ファイルを設定しました。以後は自動で上書き保存されます");
+      } catch (err) {
+        if (err.name !== 'AbortError') {
+          console.error(err);
+          alert("保存先の選択に失敗しました。");
+        }
+      }
+    }
+
+    async function writeToFsHandle(csvData) {
+      try {
+        const perm = await fsFileHandle.queryPermission({ mode: 'readwrite' });
+        if (perm !== 'granted') {
+          const req = await fsFileHandle.requestPermission({ mode: 'readwrite' });
+          if (req !== 'granted') return false;
+        }
+        const writable = await fsFileHandle.createWritable();
+        await writable.write(csvData);
+        await writable.close();
+        return true;
+      } catch (err) {
+        console.error('ファイルへの書き込みに失敗しました', err);
+        return false;
+      }
+    }
+
     function performBackup() {
       saveDB();
       const csvContent = generateFullCSV();
       const nowStr = new Date().toLocaleString('ja-JP');
-      
+
       localStorage.setItem('chrono_line_backup_csv', csvContent);
       localStorage.setItem('chrono_line_backup_time', nowStr);
 
-      fallbackDownloadCSV(csvContent);
-      return true;
+      return csvContent;
     }
 
-    function backupAndExit() {
-      performBackup();
+    async function performBackupAndSave() {
+      const csvContent = performBackup();
+
+      if (fsFileHandle) {
+        const ok = await writeToFsHandle(csvContent);
+        if (ok) {
+          showToast("バックアップファイルを上書き保存しました");
+          return;
+        }
+        showToast("上書き保存に失敗したため通常ダウンロードします");
+      }
+      fallbackDownloadCSV(csvContent);
+    }
+
+    async function backupAndExit() {
+      await performBackupAndSave();
       isExitingNormally = true;
       window.close();
     }
@@ -829,23 +917,12 @@
       showToast("バックアップCSVを保存しました");
     }
 
-    function openCSVModal() {
-      document.getElementById('csv-modal').classList.add('active');
-    }
-    function closeCSVModal() {
-      document.getElementById('csv-modal').classList.remove('active');
-    }
-    function processExportCSV() {
-      performBackup();
-      closeCSVModal();
-    }
+    function openCSVModal() { document.getElementById('csv-modal').classList.add('active'); }
+    function closeCSVModal() { document.getElementById('csv-modal').classList.remove('active'); }
+    async function processExportCSV() { await performBackupAndSave(); closeCSVModal(); }
 
-    function openImportModal() {
-      document.getElementById('import-modal').classList.add('active');
-    }
-    function closeImportModal() {
-      document.getElementById('import-modal').classList.remove('active');
-    }
+    function openImportModal() { document.getElementById('import-modal').classList.add('active'); }
+    function closeImportModal() { document.getElementById('import-modal').classList.remove('active'); }
     function processImportCSV() {
       const fileInput = document.getElementById('csv-file-input');
       if (!fileInput.files.length) {
@@ -866,9 +943,7 @@
     function initTimeSelects() {
       const startSel = document.getElementById('start-time');
       const endSel = document.getElementById('end-time');
-      startSel.innerHTML = '';
-      endSel.innerHTML = '';
-
+      startSel.innerHTML = ''; endSel.innerHTML = '';
       for (let h = START_HOUR; h <= END_HOUR; h += 0.25) {
         startSel.add(new Option(`開始: ${formatTime(h)}`, h));
         endSel.add(new Option(`終了: ${formatTime(h)}`, h));
@@ -879,6 +954,7 @@
       const dueSel = document.getElementById('task-duedate');
       dueSel.innerHTML = '<option value="">期限なし</option>';
       const daysInMonth = [31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+
       const now = new Date();
       const baseMonth = now.getMonth();
 
@@ -887,7 +963,6 @@
         const monthNum = m + 1;
         const group = document.createElement('optgroup');
         group.label = `${monthNum}月`;
-
         for (let d = 1; d <= daysInMonth[m]; d++) {
           const mm = String(monthNum).padStart(2, '0');
           const dd = String(d).padStart(2, '0');
@@ -911,7 +986,7 @@
       const rect = svg.getBoundingClientRect();
       const viewBox = svg.viewBox.baseVal;
       const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-      const svgX = (clientX - rect.left) * (viewBox.width / rect.width) + viewBox.x;
+      const svgX = (clientX - rect.left) * (viewBox.width / rect.width);
       const paddingLeft = 30;
       const width = 940;
       let hour = START_HOUR + ((svgX - paddingLeft) / width) * (END_HOUR - START_HOUR);
@@ -921,6 +996,7 @@
     function assignLanes(items) {
       const sorted = [...items].sort((a, b) => a.start - b.start || (b.end - b.start) - (a.end - a.start));
       const laneEndTimes = [];
+
       sorted.forEach(item => {
         let assigned = false;
         for (let i = 0; i < laneEndTimes.length; i++) {
@@ -936,6 +1012,7 @@
           laneEndTimes.push(item.end);
         }
       });
+
       return laneEndTimes.length || 1;
     }
 
@@ -950,17 +1027,7 @@
       const laneGap = 22;
       const totalHeight = Math.max(80, baseY + laneCount * laneGap + 15);
 
-      const isMobile = window.innerWidth <= 768;
-      if (isMobile) {
-        const pageIndex = mobilePages[offset] || 0;
-        const startHour = 8 + pageIndex * 3;
-        const minX = hourToX(startHour) - 15;
-        const rangeWidth = (940 / 12) * 3 + 30;
-        svg.setAttribute('viewBox', `${minX} 0 ${rangeWidth} ${totalHeight}`);
-      } else {
-        svg.setAttribute('viewBox', `0 0 1000 ${totalHeight}`);
-      }
-
+      svg.setAttribute('viewBox', `0 0 1000 ${totalHeight}`);
       if (wrapper) wrapper.style.height = `${totalHeight}px`;
 
       const paddingLeft = 30;
@@ -968,7 +1035,6 @@
 
       const x930 = hourToX(9.5);
       const x1830 = hourToX(18.5);
-
       const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
       rect.setAttribute('x', x930);
       rect.setAttribute('y', 4);
@@ -979,10 +1045,8 @@
 
       for (let l = 0; l < laneCount; l++) {
         const bg = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-        bg.setAttribute('x1', paddingLeft);
-        bg.setAttribute('y1', baseY + l * laneGap);
-        bg.setAttribute('x2', paddingLeft + width);
-        bg.setAttribute('y2', baseY + l * laneGap);
+        bg.setAttribute('x1', paddingLeft); bg.setAttribute('y1', baseY + l * laneGap);
+        bg.setAttribute('x2', paddingLeft + width); bg.setAttribute('y2', baseY + l * laneGap);
         bg.setAttribute('class', 'axis-bg');
         group.appendChild(bg);
       }
@@ -992,31 +1056,17 @@
         const isWorkBoundary = (i === 9 || i === 18);
 
         const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-        line.setAttribute('x1', x);
-        line.setAttribute('y1', 12);
-        line.setAttribute('x2', x);
-        line.setAttribute('y2', totalHeight - 8);
+        line.setAttribute('x1', x); line.setAttribute('y1', 16);
+        line.setAttribute('x2', x); line.setAttribute('y2', totalHeight - 8);
         line.setAttribute('class', isWorkBoundary ? 'tick-line-bold' : 'tick-line');
         group.appendChild(line);
 
         const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-        text.setAttribute('x', x);
-        text.setAttribute('y', 10);
+        text.setAttribute('x', x); text.setAttribute('y', 12);
         text.setAttribute('class', 'tick-text');
-        text.textContent = `${i}h`;
+        if (isWorkBoundary) text.setAttribute('fill', '#38bdf8');
+        text.textContent = i + '時';
         group.appendChild(text);
-
-        if (i < END_HOUR) {
-          const halfX = hourToX(i + 0.5);
-          const halfLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-          halfLine.setAttribute('x1', halfX);
-          halfLine.setAttribute('y1', 18);
-          halfLine.setAttribute('x2', halfX);
-          halfLine.setAttribute('y2', totalHeight - 12);
-          halfLine.setAttribute('class', 'tick-line');
-          halfLine.setAttribute('style', 'stroke-dasharray: 2 2; opacity: 0.4;');
-          group.appendChild(halfLine);
-        }
       }
     }
 
@@ -1025,98 +1075,92 @@
       if (!group) return;
       group.innerHTML = '';
 
-      const dk = getDateKey(offset);
-      const items = db.schedules.filter(s => s.dateKey === dk);
+      const dateKey = getDateKey(offset);
+      const items = db.schedules.filter(s => s.dateKey === dateKey);
+
       const laneCount = assignLanes(items);
-
       renderGrid(offset, laneCount);
-
-      const baseY = 30;
-      const laneGap = 22;
 
       const now = new Date();
       const currentHour = now.getHours() + now.getMinutes() / 60;
       const isToday = (offset === 0);
 
+      const baseY = 30;
+      const laneGap = 22;
+
       items.forEach(item => {
-        const y = baseY + item.lane * laneGap;
         const x1 = hourToX(item.start);
         const x2 = hourToX(item.end);
+        const barWidth = x2 - x1;
+        const y = baseY + (item.lane || 0) * laneGap;
 
-        const isCurrentlyActive = isToday && !item.manualOff && (currentHour >= item.start && currentHour <= item.end);
+        const isActiveNow = isToday && !item.manualOff && (currentHour >= item.start && currentHour <= item.end);
 
-        const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        const hitBox = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        hitBox.setAttribute('x1', x1); hitBox.setAttribute('y1', y);
+        hitBox.setAttribute('x2', x2); hitBox.setAttribute('y2', y);
+        hitBox.setAttribute('class', 'schedule-bar-hitbox');
 
-        const hitbox = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-        hitbox.setAttribute('x1', x1);
-        hitbox.setAttribute('y1', y);
-        hitbox.setAttribute('x2', x2);
-        hitbox.setAttribute('y2', y);
-        hitbox.setAttribute('class', 'schedule-bar-hitbox');
+        hitBox.addEventListener('click', (e) => {
+          if (dragState && dragState.hasMoved) return;
+          editSchedule(item.id);
+        });
 
-        hitbox.onmouseenter = (e) => showTooltip(e, `${item.title} (${formatTime(item.start)} - ${formatTime(item.end)})`);
-        hitbox.onmousemove = (e) => moveTooltip(e);
-        hitbox.onmouseleave = () => hideTooltip();
+        hitBox.addEventListener('mousedown', (e) => startDrag(e, item.id, 'move', offset));
+        hitBox.addEventListener('touchstart', (e) => startDrag(e, item.id, 'move', offset), { passive: false });
+        hitBox.addEventListener('mousemove', (e) => showTooltip(e, `${item.title} (${formatTime(item.start)} - ${formatTime(item.end)})`));
+        hitBox.addEventListener('mouseleave', hideTooltip);
+        hitBox.addEventListener('contextmenu', (e) => showContextMenu(e, item.id));
 
-        hitbox.oncontextmenu = (e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          showContextMenu(e, item.id);
-        };
-
-        hitbox.onmousedown = (e) => startDrag(e, item, 'move', offset);
-        hitbox.ontouchstart = (e) => startDrag(e, item, 'move', offset);
+        group.appendChild(hitBox);
 
         const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-        line.setAttribute('x1', x1);
-        line.setAttribute('y1', y);
-        line.setAttribute('x2', x2);
-        line.setAttribute('y2', y);
-        
-        let barClass = 'schedule-bar-main';
-        if (isCurrentlyActive) barClass += ' now-active';
-        line.setAttribute('class', barClass);
-        line.setAttribute('style', `stroke: ${item.color}; opacity: ${item.manualOff ? 0.35 : 1};`);
+        line.setAttribute('x1', x1); line.setAttribute('y1', y);
+        line.setAttribute('x2', x2); line.setAttribute('y2', y);
+        line.setAttribute('stroke', item.color || '#38bdf8');
+        line.setAttribute('class', `schedule-bar-main ${isActiveNow ? 'now-active' : ''}`);
 
-        const leftEdge = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-        leftEdge.setAttribute('cx', x1);
-        leftEdge.setAttribute('cy', y);
-        leftEdge.setAttribute('r', 8);
-        leftEdge.setAttribute('class', 'edge-handle');
-        leftEdge.onmousedown = (e) => { e.stopPropagation(); startDrag(e, item, 'start', offset); };
-        leftEdge.ontouchstart = (e) => { e.stopPropagation(); startDrag(e, item, 'start', offset); };
+        group.appendChild(line);
 
-        const rightEdge = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-        rightEdge.setAttribute('cx', x2);
-        rightEdge.setAttribute('cy', y);
-        rightEdge.setAttribute('r', 8);
-        rightEdge.setAttribute('class', 'edge-handle');
-        rightEdge.onmousedown = (e) => { e.stopPropagation(); startDrag(e, item, 'end', offset); };
-        rightEdge.ontouchstart = (e) => { e.stopPropagation(); startDrag(e, item, 'end', offset); };
+        const handleRadius = Math.min(8, barWidth / 3);
+        if (handleRadius > 1) {
+          const hLeft = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+          hLeft.setAttribute('cx', x1); hLeft.setAttribute('cy', y); hLeft.setAttribute('r', handleRadius);
+          hLeft.setAttribute('class', 'edge-handle');
+          hLeft.addEventListener('mousedown', (e) => startDrag(e, item.id, 'start', offset));
+          hLeft.addEventListener('touchstart', (e) => startDrag(e, item.id, 'start', offset), { passive: false });
+          group.appendChild(hLeft);
 
-        g.appendChild(hitbox);
-        g.appendChild(line);
-        g.appendChild(leftEdge);
-        g.appendChild(rightEdge);
-
-        if (dragState && dragState.item.id === item.id) {
-          const ghost = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-          ghost.setAttribute('x1', hourToX(dragState.tempStart));
-          ghost.setAttribute('y1', y);
-          ghost.setAttribute('x2', hourToX(dragState.tempEnd));
-          ghost.setAttribute('y2', y);
-          ghost.setAttribute('class', 'schedule-bar-ghost');
-          ghost.setAttribute('style', `stroke: ${item.color};`);
-          g.appendChild(ghost);
+          const hRight = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+          hRight.setAttribute('cx', x2); hRight.setAttribute('cy', y); hRight.setAttribute('r', handleRadius);
+          hRight.setAttribute('class', 'edge-handle');
+          hRight.addEventListener('mousedown', (e) => startDrag(e, item.id, 'end', offset));
+          hRight.addEventListener('touchstart', (e) => startDrag(e, item.id, 'end', offset), { passive: false });
+          group.appendChild(hRight);
         }
-
-        group.appendChild(g);
       });
+
+      if (dragState && dragState.offset === offset && dragState.hasMoved) {
+        const item = db.schedules.find(s => s.id === dragState.id);
+        if (item) {
+          const gx1 = hourToX(dragState.tempStart);
+          const gx2 = hourToX(dragState.tempEnd);
+          const gy = baseY + (item.lane || 0) * laneGap;
+
+          const ghost = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+          ghost.setAttribute('x1', gx1); ghost.setAttribute('y1', gy);
+          ghost.setAttribute('x2', gx2); ghost.setAttribute('y2', gy);
+          ghost.setAttribute('stroke', item.color || '#38bdf8');
+          ghost.setAttribute('class', 'schedule-bar-ghost');
+          group.appendChild(ghost);
+        }
+      }
     }
 
     function renderNowMarker() {
       const group = document.getElementById('now-marker-0');
-      if (!group) return;
+      const svg = document.getElementById('svg-0');
+      if (!group || !svg) return;
       group.innerHTML = '';
 
       const now = new Date();
@@ -1125,52 +1169,156 @@
       if (currentHour < START_HOUR || currentHour > END_HOUR) return;
 
       const x = hourToX(currentHour);
-      const svg = document.getElementById('svg-0');
-      const viewBox = svg.viewBox.baseVal;
-      const height = viewBox.height || 80;
+      const totalHeight = svg.viewBox.baseVal.height || 80;
 
       const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-      line.setAttribute('x1', x);
-      line.setAttribute('y1', 12);
-      line.setAttribute('x2', x);
-      line.setAttribute('y2', height - 5);
+      line.setAttribute('x1', x); line.setAttribute('y1', 10);
+      line.setAttribute('x2', x); line.setAttribute('y2', totalHeight - 6);
       line.setAttribute('class', 'now-line');
-
-      const head = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
-      head.setAttribute('points', `${x-4},12 ${x+4},12 ${x},18`);
-      head.setAttribute('class', 'now-head');
-
       group.appendChild(line);
-      group.appendChild(head);
+
+      const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      circle.setAttribute('cx', x); circle.setAttribute('cy', 10); circle.setAttribute('r', 4);
+      circle.setAttribute('class', 'now-head');
+      group.appendChild(circle);
+    }
+
+    function startDrag(e, scheduleId, type, offset) {
+      if (e.button && e.button !== 0) return;
+      e.stopPropagation();
+      hideTooltip();
+
+      const item = db.schedules.find(s => s.id === scheduleId);
+      if (!item) return;
+
+      if (type === 'start' || type === 'end') {
+        document.body.classList.add('is-dragging');
+      }
+
+      const initialHour = getHourFromEvent(e, offset);
+
+      dragState = {
+        id: scheduleId,
+        type: type,
+        offset: offset,
+        initialHour: initialHour,
+        initialStart: item.start,
+        initialEnd: item.end,
+        tempStart: item.start,
+        tempEnd: item.end,
+        duration: item.end - item.start,
+        hasMoved: false,
+        lastEvent: e
+      };
+
+      window.addEventListener('mousemove', onDragMove, { passive: false });
+      window.addEventListener('mouseup', onDragEnd);
+      window.addEventListener('touchmove', onDragMove, { passive: false });
+      window.addEventListener('touchend', onDragEnd);
+    }
+
+    function onDragMove(e) {
+      if (!dragState) return;
+      dragState.lastEvent = e;
+
+      if (!animFrameId) {
+        animFrameId = requestAnimationFrame(() => {
+          if (!dragState) return;
+          const evt = dragState.lastEvent;
+          const currentHour = getHourFromEvent(evt, dragState.offset);
+
+          if (Math.abs(currentHour - dragState.initialHour) > 0.05) {
+            dragState.hasMoved = true;
+            if (evt.cancelable) evt.preventDefault();
+          }
+
+          if (dragState.hasMoved) {
+            if (dragState.type === 'start') {
+              let newStart = Math.min(currentHour, dragState.initialEnd - 0.25);
+              dragState.tempStart = Math.max(START_HOUR, Math.round(newStart * 4) / 4);
+              dragState.tempEnd = dragState.initialEnd;
+            } else if (dragState.type === 'end') {
+              let newEnd = Math.max(currentHour, dragState.initialStart + 0.25);
+              dragState.tempEnd = Math.min(END_HOUR, Math.round(newEnd * 4) / 4);
+              dragState.tempStart = dragState.initialStart;
+            } else if (dragState.type === 'move') {
+              const delta = currentHour - dragState.initialHour;
+              let newStart = dragState.initialStart + delta;
+              let newEnd = newStart + dragState.duration;
+
+              if (newStart < START_HOUR) {
+                newStart = START_HOUR;
+                newEnd = START_HOUR + dragState.duration;
+              } else if (newEnd > END_HOUR) {
+                newEnd = END_HOUR;
+                newStart = END_HOUR - dragState.duration;
+              }
+
+              dragState.tempStart = Math.round(newStart * 4) / 4;
+              dragState.tempEnd = Math.round(newEnd * 4) / 4;
+            }
+
+            showTooltip(evt, `変更後: ${formatTime(dragState.tempStart)} - ${formatTime(dragState.tempEnd)}`);
+            renderBars(dragState.offset);
+          }
+          animFrameId = null;
+        });
+      }
+    }
+
+    function onDragEnd(e) {
+      if (!dragState) return;
+      document.body.classList.remove('is-dragging');
+      hideTooltip();
+
+      window.removeEventListener('mousemove', onDragMove);
+      window.removeEventListener('mouseup', onDragEnd);
+      window.removeEventListener('touchmove', onDragMove);
+      window.removeEventListener('touchend', onDragEnd);
+
+      if (dragState.hasMoved) {
+        const item = db.schedules.find(s => s.id === dragState.id);
+        if (item) {
+          item.start = dragState.tempStart;
+          item.end = dragState.tempEnd;
+          saveDB();
+          showToast("予定を変更しました");
+        }
+      }
+
+      setTimeout(() => { dragState = null; render(); }, 50);
     }
 
     function showTooltip(e, text) {
       const tt = document.getElementById('tooltip');
       tt.textContent = text;
       tt.style.display = 'block';
-      moveTooltip(e);
-    }
-    function moveTooltip(e) {
-      const tt = document.getElementById('tooltip');
       const clientX = e.touches ? e.touches[0].clientX : e.clientX;
       const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-      tt.style.left = `${clientX}px`;
-      tt.style.top = `${clientY}px`;
+      tt.style.left = clientX + 'px';
+      tt.style.top = clientY + 'px';
     }
+
     function hideTooltip() {
       document.getElementById('tooltip').style.display = 'none';
     }
 
     function showContextMenu(e, id) {
+      e.preventDefault();
+      e.stopPropagation();
       contextTargetId = id;
       const menu = document.getElementById('context-menu');
-      menu.style.left = `${e.clientX}px`;
-      menu.style.top = `${e.clientY}px`;
+      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+      menu.style.left = clientX + 'px';
+      menu.style.top = clientY + 'px';
       menu.style.display = 'block';
     }
+
     function hideContextMenu() {
       document.getElementById('context-menu').style.display = 'none';
     }
+
     function onContextDelete() {
       if (contextTargetId) {
         deleteSchedule(contextTargetId);
@@ -1179,111 +1327,39 @@
       hideContextMenu();
     }
 
-    function startDrag(e, item, mode, offset) {
-      if (e.type === 'mousedown' && e.button !== 0) return;
-      
-      const currentH = getHourFromEvent(e, offset);
-      dragState = {
-        item,
-        mode,
-        offset,
-        initialHour: currentH,
-        origStart: item.start,
-        origEnd: item.end,
-        duration: item.end - item.start,
-        tempStart: item.start,
-        tempEnd: item.end
-      };
-
-      document.body.classList.add('is-dragging');
-
-      window.addEventListener('mousemove', onDragMove);
-      window.addEventListener('touchmove', onDragMove, { passive: false });
-      window.addEventListener('mouseup', onDragEnd);
-      window.addEventListener('touchend', onDragEnd);
-    }
-
-    function onDragMove(e) {
-      if (!dragState) return;
-      if (e.cancelable) e.preventDefault();
-
-      const currentH = getHourFromEvent(e, dragState.offset);
-      const delta = currentH - dragState.initialHour;
-
-      let newStart = dragState.origStart;
-      let newEnd = dragState.origEnd;
-
-      if (dragState.mode === 'move') {
-        newStart = Math.max(START_HOUR, Math.min(END_HOUR - dragState.duration, dragState.origStart + delta));
-        newEnd = newStart + dragState.duration;
-      } else if (dragState.mode === 'start') {
-        newStart = Math.max(START_HOUR, Math.min(dragState.origEnd - 0.25, dragState.origStart + delta));
-      } else if (dragState.mode === 'end') {
-        newEnd = Math.max(dragState.origStart + 0.25, Math.min(END_HOUR, dragState.origEnd + delta));
-      }
-
-      newStart = Math.round(newStart * 4) / 4;
-      newEnd = Math.round(newEnd * 4) / 4;
-
-      dragState.tempStart = newStart;
-      dragState.tempEnd = newEnd;
-
-      showTooltip(e, `${dragState.item.title} (${formatTime(newStart)} - ${formatTime(newEnd)})`);
-
-      if (!animFrameId) {
-        animFrameId = requestAnimationFrame(() => {
-          renderBars(dragState.offset);
-          animFrameId = null;
-        });
-      }
-    }
-
-    function onDragEnd() {
-      if (!dragState) return;
-
-      document.body.classList.remove('is-dragging');
-      hideTooltip();
-
-      const item = db.schedules.find(s => s.id === dragState.item.id);
-      if (item) {
-        item.start = dragState.tempStart;
-        item.end = dragState.tempEnd;
-        saveDB();
-      }
-
-      const offset = dragState.offset;
-      dragState = null;
-      window.removeEventListener('mousemove', onDragMove);
-      window.removeEventListener('touchmove', onDragMove);
-      window.removeEventListener('mouseup', onDragEnd);
-      window.removeEventListener('touchend', onDragEnd);
-
-      renderBars(offset);
-    }
-
     function onSvgDblClick(e, offset) {
-      const h = getHourFromEvent(e, offset);
-      const startH = Math.floor(h * 2) / 2;
-      const endH = Math.min(END_HOUR, startH + 1);
+      resetForm();
 
-      document.getElementById('target-day').value = String(offset);
-      document.getElementById('start-time').value = String(startH);
-      document.getElementById('end-time').value = String(endH);
+      const hour = getHourFromEvent(e, offset);
+      const start = Math.floor(hour * 4) / 4;
+      const end = Math.min(END_HOUR, start + 1);
+
+      document.getElementById('target-day').value = offset;
+      document.getElementById('start-time').value = start;
+      document.getElementById('end-time').value = end;
       document.getElementById('title').focus();
     }
 
     function saveSchedule(e) {
       e.preventDefault();
       const offset = parseInt(document.getElementById('target-day').value, 10);
-      const dateKey = getDateKey(offset);
       const title = document.getElementById('title').value.trim();
       const start = parseFloat(document.getElementById('start-time').value);
       const end = parseFloat(document.getElementById('end-time').value);
-      const selectedColor = document.getElementById('arc-color').value;
+      const colorVal = document.getElementById('arc-color').value;
 
       if (start >= end) {
         alert("終了時刻は開始時刻より後に設定してください。");
         return;
+      }
+
+      const dateKey = getDateKey(offset);
+      let color;
+      if (colorVal === 'auto') {
+        color = palette[db.colorCounter % palette.length];
+        db.colorCounter++;
+      } else {
+        color = colorVal;
       }
 
       if (editingId) {
@@ -1293,24 +1369,25 @@
           item.title = title;
           item.start = start;
           item.end = end;
-          if (selectedColor !== 'auto') item.color = selectedColor;
+          item.color = color;
         }
+        editingId = null;
+        showToast("予定を更新しました");
       } else {
-        const color = selectedColor === 'auto' ? palette[db.colorCounter % palette.length] : selectedColor;
-        db.colorCounter++;
         db.schedules.push({
           id: Date.now(),
-          dateKey,
-          title,
-          start,
-          end,
-          color,
+          dateKey: dateKey,
+          title: title,
+          start: start,
+          end: end,
+          color: color,
           manualOff: false
         });
+        showToast("予定を追加しました");
       }
 
-      saveDB();
       resetForm();
+      saveDB();
     }
 
     function editSchedule(id) {
@@ -1318,20 +1395,19 @@
       if (!item) return;
 
       editingId = id;
-      document.getElementById('form-title').textContent = "予定の編集";
+      document.getElementById('form-title').textContent = '予定の編集';
       document.getElementById('title').value = item.title;
+      document.getElementById('start-time').value = item.start;
+      document.getElementById('end-time').value = item.end;
+      document.getElementById('arc-color').value = item.color || 'auto';
 
       let offset = 0;
       if (item.dateKey === getDateKey(-1)) offset = -1;
-      if (item.dateKey === getDateKey(1)) offset = 1;
+      else if (item.dateKey === getDateKey(1)) offset = 1;
+      document.getElementById('target-day').value = offset;
 
-      document.getElementById('target-day').value = String(offset);
-      document.getElementById('start-time').value = String(item.start);
-      document.getElementById('end-time').value = String(item.end);
-      document.getElementById('arc-color').value = item.color || 'auto';
-
-      document.getElementById('btn-submit').textContent = "更新";
-      document.getElementById('btn-cancel').style.display = "inline-block";
+      document.getElementById('btn-submit').textContent = '更新';
+      document.getElementById('btn-cancel').style.display = 'inline-block';
     }
 
     function toggleManualOff(id) {
@@ -1345,45 +1421,133 @@
     function deleteSchedule(id) {
       db.schedules = db.schedules.filter(s => s.id !== id);
       saveDB();
+      showToast("予定を削除しました");
     }
 
     function resetForm() {
       editingId = null;
-      document.getElementById('form-title').textContent = "予定の追加";
+      document.getElementById('form-title').textContent = '予定の追加';
       document.getElementById('add-form').reset();
-      document.getElementById('target-day').value = "0";
-      document.getElementById('start-time').value = "9.5";
-      document.getElementById('end-time').value = "10.5";
-      document.getElementById('btn-submit').textContent = "追加";
-      document.getElementById('btn-cancel').style.display = "none";
+      document.getElementById('target-day').value = 0;
+      document.getElementById('start-time').value = 9.5;
+      document.getElementById('end-time').value = 10.5;
+      document.getElementById('btn-submit').textContent = '追加';
+      document.getElementById('btn-cancel').style.display = 'none';
+    }
+
+    function addTask(e) {
+      e.preventDefault();
+      const title = document.getElementById('task-input').value.trim();
+      const mmdd = document.getElementById('task-duedate').value;
+
+      let dueDate = '';
+      if (mmdd) {
+        const now = new Date();
+        const selectedMonth = parseInt(mmdd.split('-')[0], 10);
+        let year = now.getFullYear();
+        const currentMonth = now.getMonth() + 1;
+        if (currentMonth === 12 && selectedMonth === 1) {
+          year += 1;
+        } else if (currentMonth === 1 && selectedMonth === 12) {
+          year -= 1;
+        }
+        dueDate = `${year}-${mmdd}`;
+      }
+
+      if (editingTaskId) {
+        const t = db.tasks.find(x => x.id === editingTaskId);
+        if (t) {
+          t.title = title;
+          t.dueDate = dueDate;
+        }
+        editingTaskId = null;
+        showToast("タスクを更新しました");
+      } else {
+        db.tasks.push({
+          id: Date.now(),
+          dateKey: getDateKey(0),
+          title: title,
+          done: false,
+          dueDate: dueDate
+        });
+        showToast("タスクを追加しました");
+      }
+
+      resetTaskForm();
+      saveDB();
+    }
+
+    function editTask(id) {
+      const t = db.tasks.find(x => x.id === id);
+      if (!t) return;
+
+      editingTaskId = id;
+      document.getElementById('task-input').value = t.title;
+
+      if (t.dueDate) {
+        const parts = t.dueDate.split('-');
+        if (parts.length === 3) {
+          document.getElementById('task-duedate').value = `${parts[1]}-${parts[2]}`;
+        }
+      } else {
+        document.getElementById('task-duedate').value = '';
+      }
+
+      document.getElementById('task-btn-submit').textContent = '更新';
+      document.getElementById('task-btn-cancel').style.display = 'inline-block';
+    }
+
+    function toggleTask(id) {
+      const t = db.tasks.find(x => x.id === id);
+      if (t) {
+        t.done = !t.done;
+        saveDB();
+      }
+    }
+
+    function deleteTask(id) {
+      db.tasks = db.tasks.filter(t => t.id !== id);
+      saveDB();
+      showToast("タスクを削除しました");
+    }
+
+    function resetTaskForm() {
+      editingTaskId = null;
+      document.getElementById('task-input').value = '';
+      document.getElementById('task-duedate').value = '';
+      document.getElementById('task-btn-submit').textContent = '追加';
+      document.getElementById('task-btn-cancel').style.display = 'none';
     }
 
     function renderScheduleList() {
-      const selOffset = parseInt(document.getElementById('list-day-select').value, 10);
-      const dk = getDateKey(selOffset);
       const listEl = document.getElementById('schedule-list');
+      if (!listEl) return;
 
-      const items = db.schedules.filter(s => s.dateKey === dk).sort((a,b) => a.start - b.start);
+      const offset = parseInt(document.getElementById('list-day-select').value, 10);
+      const dateKey = getDateKey(offset);
+      const items = db.schedules.filter(s => s.dateKey === dateKey);
 
-      if (items.length === 0) {
-        listEl.innerHTML = `<div style="font-size:11px; color:var(--text-sub); text-align:center; padding:12px;">予定はありません</div>`;
-        return;
-      }
+      items.sort((a, b) => a.start - b.start);
 
       const now = new Date();
       const currentHour = now.getHours() + now.getMinutes() / 60;
-      const isToday = (selOffset === 0);
+      const isToday = (offset === 0);
+
+      if (items.length === 0) {
+        listEl.innerHTML = '<div style="font-size:11px; color:var(--text-sub); text-align:center; padding:12px;">予定はありません</div>';
+        return;
+      }
 
       let html = '';
       items.forEach(item => {
-        const isActive = isToday && !item.manualOff && (currentHour >= item.start && currentHour <= item.end);
+        const isActiveNow = isToday && !item.manualOff && (currentHour >= item.start && currentHour <= item.end);
+
         html += `
-          <div class="list-item ${isActive ? 'active-now' : ''}">
-            <div style="display:flex; align-items:center; overflow:hidden; margin-right:6px;">
-              <span class="color-indicator" style="color: ${item.color};"></span>
-              <span style="font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
-                ${item.title} (${formatTime(item.start)}-${formatTime(item.end)})
-              </span>
+          <div class="list-item ${isActiveNow ? 'active-now' : ''}">
+            <div style="display:flex; align-items:center; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; margin-right:6px;">
+              <span class="color-indicator" style="color: ${item.color || '#38bdf8'};"></span>
+              <span style="font-weight:600; margin-right:6px;">${item.title}</span>
+              <span style="font-size:10px; color:var(--text-sub);">(${formatTime(item.start)}-${formatTime(item.end)})</span>
             </div>
             <div style="display:flex; align-items:center; flex-shrink:0;">
               <button class="btn-off" onclick="toggleManualOff(${item.id})">${item.manualOff ? 'ON' : 'OFF'}</button>
@@ -1393,90 +1557,31 @@
           </div>
         `;
       });
+
       listEl.innerHTML = html;
-    }
-
-    function addTask(e) {
-      e.preventDefault();
-      const title = document.getElementById('task-input').value.trim();
-      const dueDate = document.getElementById('task-duedate').value;
-
-      if (editingTaskId) {
-        const t = db.tasks.find(x => x.id === editingTaskId);
-        if (t) {
-          t.title = title;
-          t.dueDate = dueDate;
-        }
-      } else {
-        db.tasks.push({
-          id: Date.now(),
-          dateKey: getDateKey(0),
-          title,
-          done: false,
-          dueDate
-        });
-      }
-
-      saveDB();
-      resetTaskForm();
-    }
-
-    function toggleTaskDone(id) {
-      const t = db.tasks.find(x => x.id === id);
-      if (t) {
-        t.done = !t.done;
-        saveDB();
-      }
-    }
-
-    function editTask(id) {
-      const t = db.tasks.find(x => x.id === id);
-      if (!t) return;
-      editingTaskId = id;
-      document.getElementById('task-input').value = t.title;
-      document.getElementById('task-duedate').value = t.dueDate || '';
-      document.getElementById('task-btn-submit').textContent = "更新";
-      document.getElementById('task-btn-cancel').style.display = "inline-block";
-    }
-
-    function deleteTask(id) {
-      db.tasks = db.tasks.filter(x => x.id !== id);
-      saveDB();
-    }
-
-    function resetTaskForm() {
-      editingTaskId = null;
-      document.getElementById('task-input').value = '';
-      document.getElementById('task-duedate').value = '';
-      document.getElementById('task-btn-submit').textContent = "追加";
-      document.getElementById('task-btn-cancel').style.display = "none";
     }
 
     function renderTaskList() {
       const listEl = document.getElementById('task-list');
+      if (!listEl) return;
+
+      const todayStr = getDateKey(0);
+
       if (db.tasks.length === 0) {
-        listEl.innerHTML = `<div style="font-size:11px; color:var(--text-sub); text-align:center; padding:12px;">タスクはありません</div>`;
+        listEl.innerHTML = '<div style="font-size:11px; color:var(--text-sub); text-align:center; padding:12px;">タスクはありません</div>';
         return;
       }
 
-      const now = new Date();
-      const mm = String(now.getMonth() + 1).padStart(2, '0');
-      const dd = String(now.getDate()).padStart(2, '0');
-      const todayMMDD = `${mm}-${dd}`;
-
       let html = '';
       db.tasks.forEach(task => {
-        let isOverdue = false;
-        if (task.dueDate && !task.done) {
-          if (task.dueDate < todayMMDD) isOverdue = true;
-        }
+        const isOverdue = !task.done && task.dueDate && (task.dueDate < todayStr);
 
         html += `
           <div class="task-item">
-            <div style="display:flex; align-items:center; gap:6px; overflow:hidden;">
-              <input type="checkbox" class="task-checkbox" ${task.done ? 'checked' : ''} onchange="toggleTaskDone(${task.id})">
+            <div style="display:flex; align-items:center; gap:8px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; margin-right:6px;">
+              <input type="checkbox" class="task-checkbox" ${task.done ? 'checked' : ''} onchange="toggleTask(${task.id})">
               <span class="task-title ${task.done ? 'done' : ''}">${task.title}</span>
-              ${task.dueDate ? `<span style="font-size:9px; color:var(--text-sub);">[${task.dueDate}]</span>` : ''}
+              ${task.dueDate ? `<span style="font-size:9px; color:var(--text-sub);">[${task.dueDate.substring(5)}]</span>` : ''}
               ${isOverdue ? `<span class="badge-overdue">期限切</span>` : ''}
             </div>
             <div style="display:flex; align-items:center; flex-shrink:0;">
@@ -1510,11 +1615,13 @@
       renderTaskList();
     }
 
-    // 初期化
-    initTimeSelects();
-    render();
-    openStartupModal();
-    setInterval(updateClock, 1000);
+    window.addEventListener('DOMContentLoaded', async () => {
+      initTimeSelects();
+      render();
+      setInterval(updateClock, 1000);
+      await restoreFsHandle();
+      openStartupModal();
+    });
   </script>
 </body>
 </html>
