@@ -680,7 +680,6 @@
     }
 
     async function handleRestore() {
-      // 優先順位: 1. 指定済みの保存先ファイル（Googleドライブ等） 2. このブラウザのlocalStorage
       let backupCsv = null;
       let source = '';
 
@@ -702,8 +701,6 @@
         return;
       }
 
-      // File System Access API非対応（主にスマホ）で保存データも見つからない場合は
-      // CSV読み込み画面を自動で開き、Googleドライブ等からファイルを選んでもらう
       if (!FS_SUPPORTED) {
         closeStartupModal();
         showToast("保存データが見つかりません。CSVファイルを選択してください");
@@ -783,7 +780,6 @@
     let fsFileHandle = null;
     const FS_SUPPORTED = 'showSaveFilePicker' in window;
 
-    // IndexedDBにファイルハンドルを保存/復元するための簡易ラッパー
     function idbOpen() {
       return new Promise((resolve, reject) => {
         const req = indexedDB.open('chrono_line_fs_db', 1);
@@ -811,17 +807,16 @@
       });
     }
 
-    // 起動時に前回選択したファイルハンドルを復元（権限が生きていれば自動で使う）
+    // 起動時に前回選択したファイルハンドルを復元
+    // 権限は保留状態でもハンドル自体は保持しておき、実際の権限確認・再許可は
+    // ユーザー操作（BK・Closeやrestoreのクリック）のタイミングで行う
     async function restoreFsHandle() {
       if (!FS_SUPPORTED) return;
       try {
         const handle = await idbGetHandle();
         if (!handle) return;
-        const perm = await handle.queryPermission({ mode: 'readwrite' });
-        if (perm === 'granted') {
-          fsFileHandle = handle;
-          updateBkButtonLabel();
-        }
+        fsFileHandle = handle;
+        updateBkButtonLabel();
       } catch (err) {
         console.warn('ファイルハンドルの復元に失敗しました', err);
       }
@@ -833,7 +828,6 @@
       btn.textContent = fsFileHandle ? '💾 BK上書き・Close' : '💾 BK・Close';
     }
 
-    // 保存先ファイルを新規に選択（初回のみ、または保存先を変更したい時に使用）
     async function chooseBackupFile() {
       if (!FS_SUPPORTED) {
         alert("お使いのブラウザはこの機能に対応していません（Chrome/Edge推奨）。従来のダウンロード方式を使用します。");
