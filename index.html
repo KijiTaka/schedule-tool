@@ -445,7 +445,7 @@
       <div style="font-size:14px; font-weight:bold; margin-bottom:12px;">📊 CSV出力</div>
       <div style="font-size:11px; color:var(--text-sub); margin-bottom:16px;">
         登録されている全予定とタスクをCSVフォーマットで書き出します。<br>
-        「📁 保存先指定」で保存先ファイルを一度設定しておくと、以後は自動で上書き保存されます。
+        「📁 Save location」で保存先ファイルを一度設定しておくと、以後は自動で上書き保存されます。
       </div>
       <div style="display:flex; gap:8px;">
         <button class="btn-primary" onclick="processExportCSV()" style="flex:1;">ダウンロード</button>
@@ -481,10 +481,10 @@
     </div>
 
     <div class="header-actions" style="display: flex; gap: 6px; align-items: center;">
-      <button class="btn-secondary" onclick="openImportModal()">📥 CSV読み込み</button>
-      <button class="btn-secondary" onclick="openCSVModal()">📊 CSV書き出し</button>
-      <button class="btn-secondary" onclick="chooseBackupFile()" title="PC等で同期フォルダ内のファイルを指定すると自動上書きが有効になります">📁 保存先指定</button>
-      <button class="btn-danger" id="bk-close-btn" onclick="backupAndExit()">💾 BK・Close</button>
+      <button class="btn-secondary" onclick="openImportModal()">📥 CSV・LD</button>
+      <button class="btn-secondary" onclick="openCSVModal()">📊 CSV・DL</button>
+      <button class="btn-secondary" onclick="chooseBackupFile()" title="PC等で同期フォルダ内のファイルを指定すると自動上書きが有効になります">📁 Save location</button>
+      <button class="btn-danger" id="bk-close-btn" onclick="backupAndExit()">💾 Close（BK）</button>
     </div>
   </div>
 
@@ -874,7 +874,7 @@
     function updateBkButtonLabel() {
       const btn = document.getElementById('bk-close-btn');
       if (!btn) return;
-      btn.textContent = fsFileHandle ? '💾 BK上書き・Close' : '💾 BK・Close';
+      btn.textContent = fsFileHandle ? '💾 Close（BK）' : '💾 Close（BK）';
     }
 
     async function chooseBackupFile() {
