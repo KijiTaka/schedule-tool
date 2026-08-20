@@ -26,6 +26,7 @@
       max-width: 1280px;
       margin: 0 auto;
       min-height: 100vh;
+      overflow-x: hidden; /* 全体の横スクロールを抑止 */
     }
 
     body.is-dragging, body.is-dragging * { cursor: ew-resize !important; touch-action: none; }
@@ -127,7 +128,6 @@
       color: var(--primary);
     }
 
-    /* 3時間切り替えナビゲーション（デフォルト非表示：スマホ時のみCSSで表示） */
     .timeline-nav-controls {
       display: none;
       align-items: center;
@@ -295,10 +295,14 @@
       box-shadow: 0 4px 12px rgba(0,0,0,0.4);
     }
 
+    /* 修正箇所：Gridカードの横幅溢れを防止 */
     .bottom-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       gap: 12px;
+    }
+    .bottom-grid > .card {
+      min-width: 0;
     }
 
     .card {
@@ -322,6 +326,7 @@
       color: var(--text);
       font-size: 13px;
       outline: none;
+      max-width: 100%;
     }
     input:focus, select:focus { border-color: var(--primary); }
     .btn-primary { background: var(--primary); color: #0f172a; border: none; font-weight: 700; cursor: pointer; }
@@ -364,6 +369,7 @@
       padding: 1px 4px;
       border-radius: 4px;
       margin-left: 4px;
+      flex-shrink: 0;
     }
 
     .color-indicator { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 6px; box-shadow: 0 0 6px currentColor; flex-shrink: 0; }
@@ -379,10 +385,22 @@
       border: 1px solid rgba(255, 255, 255, 0.05);
       font-size: 12px;
     }
-    .task-checkbox { width: 16px; height: 16px; cursor: pointer; accent-color: var(--success); }
+    .task-checkbox { width: 16px; height: 16px; cursor: pointer; accent-color: var(--success); flex-shrink: 0; }
     .task-title.done { text-decoration: line-through; color: var(--text-sub); }
 
-    /* スマホ表示時の制御 */
+    /* 修正箇所：リスト内テキストが長い場合に縮小・省略(...)表示 */
+    .list-item > div:first-child,
+    .task-item > div:first-child {
+      min-width: 0;
+      flex: 1;
+    }
+    .list-item span,
+    .task-item span {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
     @media (max-width: 768px) {
       body { padding: 8px; }
       .top-bar { flex-direction: column; align-items: stretch; }
@@ -393,7 +411,6 @@
       .timeline-card { padding: 8px 10px; }
       input, select, button { font-size: 14px; }
       
-      /* スマホ表示時のみ ◀ ▶ ナビゲーションを表示 */
       .timeline-nav-controls {
         display: flex;
       }
@@ -590,12 +607,12 @@
       <form onsubmit="addTask(event)" style="display: flex; flex-direction: column; gap: 4px; margin-bottom: 6px;">
         <input type="text" id="task-input" placeholder="タスクタイトル..." required style="width: 100%;">
         <div style="display: flex; gap: 4px; align-items: center;">
-          <span style="font-size: 10px; color: var(--text-sub);">期限:</span>
-          <select id="task-duedate" style="flex: 1; font-size: 11px; padding: 4px;">
+          <span style="font-size: 10px; color: var(--text-sub); flex-shrink:0;">期限:</span>
+          <select id="task-duedate" style="flex: 1; font-size: 11px; padding: 4px; min-width:0;">
             <option value="">期限なし</option>
           </select>
-          <button type="submit" class="btn-primary" id="task-btn-submit" style="padding: 6px 12px;">追加</button>
-          <button type="button" class="btn-secondary" id="task-btn-cancel" onclick="resetTaskForm()" style="display:none; padding: 6px 8px;">中止</button>
+          <button type="submit" class="btn-primary" id="task-btn-submit" style="padding: 6px 12px; flex-shrink:0;">追加</button>
+          <button type="button" class="btn-secondary" id="task-btn-cancel" onclick="resetTaskForm()" style="display:none; padding: 6px 8px; flex-shrink:0;">中止</button>
         </div>
       </form>
       <div id="task-list"></div>
@@ -606,7 +623,6 @@
     const START_HOUR = 8;
     const END_HOUR = 20;
 
-    // 各タイムラインの表示状態設定
     let viewState = {
       '-1': { startHour: 8, span: 12 },
       '0': { startHour: 8, span: 12 },
@@ -1000,7 +1016,6 @@
       }
     }
 
-    // スマホでの 3時間スクロール切替処理
     function shiftWindow(offset, dir) {
       if (!isMobileDevice()) return;
 
@@ -1019,13 +1034,11 @@
     }
 
     function getEffectiveViewState(offset) {
-      // PC画面（>768px）では常に全タイムライン（8時〜20時、幅12h）
       if (!isMobileDevice()) {
         return { startHour: 8, span: 12 };
       }
-      // スマホ画面では current viewState（デフォルト3h表示）
       const st = viewState[offset] || { startHour: 8, span: 3 };
-      if (st.span === 12) st.span = 3; // スマホ初期値のフォールバック
+      if (st.span === 12) st.span = 3;
       return st;
     }
 
@@ -1107,7 +1120,6 @@
       const paddingLeft = 30;
       const width = 940;
 
-      // コアゾーン（9:30-18:30）の描画
       if (maxH > 9.5 && minH < 18.5) {
         const xStart = hourToX(Math.max(minH, 9.5), offset);
         const xEnd = hourToX(Math.min(maxH, 18.5), offset);
@@ -1128,7 +1140,6 @@
         group.appendChild(bg);
       }
 
-      // 目盛り描画
       const step = 1;
       for (let i = minH; i <= maxH; i += step) {
         const x = hourToX(i, offset);
@@ -1640,10 +1651,10 @@
 
         html += `
           <div class="list-item ${isActiveNow ? 'active-now' : ''}">
-            <div style="display:flex; align-items:center; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; margin-right:6px;">
+            <div style="display:flex; align-items:center; margin-right:6px;">
               <span class="color-indicator" style="color: ${item.color || '#38bdf8'};"></span>
               <span style="font-weight:600; margin-right:6px;">${item.title}</span>
-              <span style="font-size:10px; color:var(--text-sub);">(${formatTime(item.start)}-${formatTime(item.end)})</span>
+              <span style="font-size:10px; color:var(--text-sub); flex-shrink:0;">(${formatTime(item.start)}-${formatTime(item.end)})</span>
             </div>
             <div style="display:flex; align-items:center; flex-shrink:0;">
               <button class="btn-off" onclick="toggleManualOff(${item.id})">${item.manualOff ? 'ON' : 'OFF'}</button>
@@ -1674,10 +1685,10 @@
 
         html += `
           <div class="task-item">
-            <div style="display:flex; align-items:center; gap:8px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; margin-right:6px;">
+            <div style="display:flex; align-items:center; gap:8px; margin-right:6px;">
               <input type="checkbox" class="task-checkbox" ${task.done ? 'checked' : ''} onchange="toggleTask(${task.id})">
               <span class="task-title ${task.done ? 'done' : ''}">${task.title}</span>
-              ${task.dueDate ? `<span style="font-size:9px; color:var(--text-sub);">[${task.dueDate.substring(5)}]</span>` : ''}
+              ${task.dueDate ? `<span style="font-size:9px; color:var(--text-sub); flex-shrink:0;">[${task.dueDate.substring(5)}]</span>` : ''}
               ${isOverdue ? `<span class="badge-overdue">期限切</span>` : ''}
             </div>
             <div style="display:flex; align-items:center; flex-shrink:0;">
@@ -1702,7 +1713,6 @@
     }
 
     function render() {
-      // スマホ起動時のデフォルト表示幅を3時間に設定
       if (isMobileDevice()) {
         [-1, 0, 1].forEach(offset => {
           if (viewState[offset].span === 12) {
@@ -1721,7 +1731,6 @@
       renderTaskList();
     }
 
-    // 画面リサイズ時にPC/スマホ表示を自動切替
     window.addEventListener('resize', () => {
       render();
     });
