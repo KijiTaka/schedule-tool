@@ -26,7 +26,7 @@
       max-width: 1280px;
       margin: 0 auto;
       min-height: 100vh;
-      overflow-x: hidden; /* 全体の横スクロールを抑止 */
+      overflow-x: hidden;
     }
 
     body.is-dragging, body.is-dragging * { cursor: ew-resize !important; touch-action: none; }
@@ -295,7 +295,6 @@
       box-shadow: 0 4px 12px rgba(0,0,0,0.4);
     }
 
-    /* 修正箇所：Gridカードの横幅溢れを防止 */
     .bottom-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -388,7 +387,6 @@
     .task-checkbox { width: 16px; height: 16px; cursor: pointer; accent-color: var(--success); flex-shrink: 0; }
     .task-title.done { text-decoration: line-through; color: var(--text-sub); }
 
-    /* 修正箇所：リスト内テキストが長い場合に縮小・省略(...)表示 */
     .list-item > div:first-child,
     .task-item > div:first-child {
       min-width: 0;
@@ -444,8 +442,7 @@
       <button class="modal-close-btn" onclick="closeCSVModal()">✕</button>
       <div style="font-size:14px; font-weight:bold; margin-bottom:12px;">📊 CSV出力</div>
       <div style="font-size:11px; color:var(--text-sub); margin-bottom:16px;">
-        登録されている全予定とタスクをCSVフォーマットで書き出します。<br>
-        「📁 Save location」で保存先ファイルを一度設定しておくと、以後は自動で上書き保存されます。
+        登録されている全予定とタスクをCSVフォーマットで書き出します。
       </div>
       <div style="display:flex; gap:8px;">
         <button class="btn-primary" onclick="processExportCSV()" style="flex:1;">ダウンロード</button>
@@ -698,7 +695,6 @@
 
     function saveDB() {
       localStorage.setItem('chrono_line_24h_db', JSON.stringify(db));
-      render();
     }
 
     function openStartupModal() {
@@ -749,6 +745,7 @@
       if (backupCsv) {
         parseAndRestoreCSV(backupCsv);
         saveDB();
+        render();
         showToast(`復元しました（${source}）`);
         closeStartupModal();
         return;
@@ -768,6 +765,7 @@
     function handleRestart() {
       db = { schedules: [], tasks: [], colorCounter: 0 };
       saveDB();
+      render();
       showToast("新規データでスタートしました");
       closeStartupModal();
     }
@@ -962,7 +960,11 @@
 
     function openCSVModal() { document.getElementById('csv-modal').classList.add('active'); }
     function closeCSVModal() { document.getElementById('csv-modal').classList.remove('active'); }
-    async function processExportCSV() { await performBackupAndSave(); closeCSVModal(); }
+    async function processExportCSV() { 
+      saveDB();
+      await performBackupAndSave(); 
+      closeCSVModal(); 
+    }
 
     function openImportModal() { document.getElementById('import-modal').classList.add('active'); }
     function closeImportModal() { document.getElementById('import-modal').classList.remove('active'); }
@@ -977,6 +979,7 @@
       reader.onload = function(e) {
         parseAndRestoreCSV(e.target.result);
         saveDB();
+        render();
         showToast("CSVデータを復元しました");
         closeImportModal();
       };
@@ -1493,8 +1496,9 @@
         showToast("予定を追加しました");
       }
 
-      resetForm();
       saveDB();
+      render();
+      resetForm();
     }
 
     function editSchedule(id) {
@@ -1522,12 +1526,14 @@
       if (item) {
         item.manualOff = !item.manualOff;
         saveDB();
+        render();
       }
     }
 
     function deleteSchedule(id) {
       db.schedules = db.schedules.filter(s => s.id !== id);
       saveDB();
+      render();
       showToast("予定を削除しました");
     }
 
@@ -1580,8 +1586,9 @@
         showToast("タスクを追加しました");
       }
 
-      resetTaskForm();
       saveDB();
+      render();
+      resetTaskForm();
     }
 
     function editTask(id) {
@@ -1609,12 +1616,14 @@
       if (t) {
         t.done = !t.done;
         saveDB();
+        render();
       }
     }
 
     function deleteTask(id) {
       db.tasks = db.tasks.filter(t => t.id !== id);
       saveDB();
+      render();
       showToast("タスクを削除しました");
     }
 
